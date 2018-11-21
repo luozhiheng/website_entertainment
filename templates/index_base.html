@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <script src="{% static "jquery-3.3.1.js"%}"></script>
+    <script src="{% static "bootstrap-3.3.7-dist/js/bootstrap.js" %}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>好乐-首页</title>
+</head>
+<body >
+
+    <!--nav bra div-->
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+
+            <!--logo-->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainNavBar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                </button>
+                <a href= "/" class="navbar-brand "  style="font-family: Satisfy-Regular,cursive">haoyeu</a>
+            </div>
+
+            <!--menu item-->
+            <div class="collapse navbar-collapse" id="mainNavBar">
+                <ul class="nav navbar-nav">
+                    <li ><a href="/music/"><span class="glyphicon glyphicon-music"></span>&nbsp;音乐</a></li>
+                </ul>
+                <ul class="nav navbar-nav">
+                    <li><a href="#"><span class="glyphicon glyphicon-comment"></span>&nbsp;论坛</a></li>
+                </ul>
+                <ul class="nav navbar-nav">
+                    <li ><a href="#"><span class="glyphicon glyphicon-list"></span>&nbsp;交易区</a></li>
+                </ul>
+
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown"><a class=" dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span>&nbsp;{{ user.username }}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li ><a href="#"> <span class="glyphicon glyphicon-stats"></span>&nbsp;个人信息</a></li>
+                            <li ><a href="{% url 'music:logout' %}"><span class="glyphicon glyphicon-off"></span>&nbsp;登出</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/music/register/"><span class="glyphicon glyphicon-plus-sign"></span>&nbsp;注册</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+{% block body %}
+{% endblock %}
+
+</body>
+
+</html>

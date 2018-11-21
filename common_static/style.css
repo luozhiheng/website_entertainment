@@ -1,0 +1,31 @@
+@font-face {
+    font-family:Satisfy-Regular;
+    src:url(bootstrap-3.3.7-dist/fonts/Satisfy-Regular.ttf);
+}
+
+
+#music{
+    background: white url("img/background.png");
+}
+
+body{
+
+}
+
+
+.navbar{
+    border-radius: 0;
+}
+
+.navbar-brand{
+    font-family: Satisfy-Regular,cursive;
+}
+
+.glyphicon-star {
+    color: darkgray;
+    font-size: 16px;
+}
+
+.glyphicon-star.active {
+    color: goldenrod;
+}

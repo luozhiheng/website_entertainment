@@ -1,0 +1,97 @@
+{% extends 'music/base.html' %}
+{% block title %}专辑信息{% endblock %}
+
+{% block body %}
+    <div class="container-fluid songs-container">
+        <div class="row">
+            <!--left album info-->
+            <div class="col-sm-4 col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <a href="{% url 'music:detail' pk=album.id %}">
+                            <img class="img-responsive" width="250" height="250"
+                                 src="{% if album.album_logo %}{{ album.album_logo.url }}{% endif %}"
+                                 alt="图片不存在">
+                        </a>
+                        <h1>{{ album.album_title }}</h1>
+                        <h3>{{ album.artist }}</h3>
+                        {% if belong == 'Y' %}<a href="{% url 'music:album-update' pk=album.id %}">修改专辑信息</a>{% endif %}
+                        <pre class="panel panel-body">{{ album.genre }}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!--right album info-->
+            <div class="col-sm-8 col-md-9">
+                <ul class="nav nav-pills" style="margin-bottom: 10px">
+                    <li role="presentation" class="active"><a href="{% url 'music:detail' pk=album.id %}">所有曲目</a></li>
+                    <li role="presentation"><a href="{% url 'music:song-create' pk=album.id %}">添加歌曲</a></li>
+                </ul>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {% if error_message %}
+                            <h3><strong class="text-danger">{{ error_message }}</strong></h3>
+                        {% endif %}
+                        <h3 style="display: inline">曲目</h3>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>曲名</th>
+                                <th>文件</th>
+                                <th>喜爱</th>
+                                <th>删除</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for song in all_songs %}
+
+                                <tr>
+                                    <!--song title-->
+                                    <td>
+                                        <span style="">{{ song.song_title }}</span>
+                                    </td>
+
+
+                                    <!--file-->
+                                    <td>
+                                        {% if song.audio_file %}
+                                            <audio style="display: inline" controls="controls">
+                                                <source id="playlist" src="{{ song.audio_file.url }}"
+                                                        type="audio/mpeg"/>
+                                            </audio>
+                                        {% endif %}
+                                    </td>
+
+                                    <!--is favorite-->
+                                    <td>
+                                        <a  href="{% url 'music:favorite' song_id=song.id %}"
+                                           class="btn btn-default btn-sm btn-favorite">
+                                            <span class="glyphicon glyphicon-star
+                                            {% for id_song_favorite in id_songs_favorite %}
+                                                {% if id_song_favorite == song.id %}
+                                                    active
+                                                {% endif %}
+                                            {% endfor %}">
+                                            </span>
+                                        </a>
+                                    </td>
+                                    <!--delete-->
+                                    <td>
+                                        <a href="{% url 'music:song-delete' pk=album.id  song_id=song.id %}">
+                                            <button class="btn btn-default btn-sm"><span
+                                                    class="glyphicon glyphicon-trash"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

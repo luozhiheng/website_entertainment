@@ -1,0 +1,48 @@
+{% extends 'music/base.html' %}
+{% block title %}歌曲{% endblock %}
+{% block songs_active %}active{% endblock %}
+
+
+{% block body %}
+    <div class="container-fluid songs-container">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="nav nav-pills" style="margin-bottom: 10px">
+                    <li role="presentation" class={% if filter_by == 'all' %}active{% endif %}><a
+                            href="{% url 'music:songs' filter_by='all' %}">查看全部</a></li>
+                    <li role="presentation" class={% if filter_by == 'favorite' %}active{% endif %}><a
+                            href="{% url 'music:songs' filter_by='favorite' %}">查看喜爱的</a></li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="panel-group">
+
+                            <!--列出每个用户的歌曲-->
+                            {% include page_template %}
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+{% endblock %}

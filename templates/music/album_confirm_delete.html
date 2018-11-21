@@ -1,0 +1,8 @@
+{% extends 'music/base.html' %}
+{% block title %}删除专辑{% endblock %}
+{% block body %}
+<form action="" method="post">{% csrf_token %}
+    <h1><strong class="text-danger">你确定要删除 "{{ object }}"?</strong></h1>
+    <input type="submit" value="Confirm" />
+</form>
+{% endblock %}

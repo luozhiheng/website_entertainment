@@ -1,0 +1,38 @@
+{% for field in form %}
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <span class="text-danger small">{{ field.errors }}</span>
+        </div>
+        <label class="control-label col-sm-3" for="field"><span
+                id="title{{ forloop.counter }}">{{ field.label_tag }}</span></label>
+        <div class="col-sm-9" id="field">{{ field }}</div>
+
+    </div>
+{% endfor %}
+
+
+<script type="text/javascript">
+    {#if (document.title === '新增专辑')#}
+    {#{#}
+    {#    var dic = ['', '艺人', '专辑标题', '描述', '专辑封面'];#}
+    {#    for (var i = 1; i < 5; i++)#}
+    {#    {#}
+    {#        $('#title' + i).text(dic[i])#}
+    {#    }#}
+    {#}#}
+    {#else if(document.title === '增加歌曲')#}
+    {#{#}
+    {#    dic = ['', '歌曲名称', '文件'];#}
+    {#    for ( i = 1; i < 3; i++) {#}
+    {#        $('#title' + i).text(dic[i])}}#}
+    {#else#}
+    {#{#}
+    {#    dic = ['', '用户名', '邮箱','密码'];#}
+    {#    for ( i = 1; i < 4; i++)#}
+    {#    {#}
+    {#        $('#title' + i).text(dic[i])#}
+    {#    }#}
+    {#}#}
+
+</script>
+

@@ -1,0 +1,69 @@
+
+{% load el_pagination_tags %}
+
+<!--列出每个用户的歌曲-->
+{% paginate 4 user_song_list %}
+{% for key,songs in user_song_list %}
+    <!--if 判断是否需要列出歌单-->
+
+    <div class="panel panel-default">
+        <table id="{{ key }}" class="table"  >
+            <thead>
+                <tr  style="background-color: lightgray;">
+                    <th width="20%" role="button" style="color: royalblue" >
+                        {{ key }}的歌曲<span  class="caret"></span>
+                    </th>
+                    <th> 艺人</th>
+                    <th>文件</th>
+                    <th width="20%">专辑</th>
+                    <th>喜爱</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                    {% for song in songs %}
+                        <tr>
+                            <td width="20%">{{ song.song_title }}</td>
+                            <td width="20%">{{ song.album.artist }}</td>
+                            <td width="20%">
+                                <a target="_blank" href="{{ song.audio_file.url }}">
+                                    <button type="button" class="btn btn-success btn-xs">
+                                        <span class="glyphicon glyphicon-play"></span>&nbsp;播放
+                                    </button>
+                                </a>
+                            </td>
+                            <td width="30%" >
+                                <a  href="{% url 'music:detail' song.album.id %}"><img
+                                        src="{% if song.album.album_logo %}{{ song.album.album_logo.url }}{% endif %}"
+                                        class="img-responsive"
+                                        style="width: 20px;float: left;margin-right: 7px"/></a>
+                                <a href="{% url 'music:detail' song.album.id %}">{{ song.album.album_title }}</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'music:favorite' song_id=song.id %}" class="btn btn-sm btn-favorite">
+                                    <span class="glyphicon glyphicon-star
+                                    {% for id_song_favorite in id_songs_favorite %}
+                                        {% if id_song_favorite == song.id %}
+                                            active
+                                        {% endif %}
+                                    {% endfor %}">
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+{% endfor %}
+
+{% get_pages %}
+{% if pages|length > 1 %}
+    <div class="row panel panel-footer">
+        <h4>{% show_pages %}</h4>
+    </div>
+{% endif %}
+
+

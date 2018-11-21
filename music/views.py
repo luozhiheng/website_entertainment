@@ -9,9 +9,12 @@ from .forms import SongForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
+import uuid
+from PIL import Image
+from celery_app.tasks import img2text_ocr
 
 # from django.db import connection
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIO_FILE_TYPES = ['wav', 'mp3', 'ogg']
 IMAGE_FILE_TYPES = ['png', 'jpg', 'jpeg']
 init_list_name = '默认列表'
@@ -27,6 +30,9 @@ def index(request):
         if len(favorite_list) == 0:
             favorite_list = FavoriteList(name=init_list_name, user=request.user)
             favorite_list.save()
+            favorite_list = request.user.favorite.filter(name=init_list_name).get()  # len() 执行了query，重新获取
+        else:
+            favorite_list = favorite_list.get()
         id_albums_favorite = [al.id for al in favorite_list.albums_favorite.all()]
         id_songs_favorite = [song.id for song in favorite_list.songs_favorite.all()]
         if query:
@@ -54,10 +60,16 @@ def detail(request, pk):
     if not request.user.is_authenticated:
         return render(request, 'music/login.html')
     else:
+        belong = 'N'
         album = get_object_or_404(Album, pk=pk)
+        if album.user.id == request.user.id:
+            belong = 'Y'
         favorite_list = request.user.favorite.get(name=init_list_name)
         id_songs_favorite = [song.id for song in favorite_list.songs_favorite.all()]
-        return render(request, 'music/detail.html', {'album': album, 'id_songs_favorite': id_songs_favorite})
+        all_songs = [song for song in album.song_set.all()]
+        return render(request, 'music/detail.html',
+                      {'album': album, 'id_songs_favorite': id_songs_favorite, 'belong': belong,
+                       'all_songs': all_songs})
 
 
 def album_create(request):
@@ -73,35 +85,49 @@ def album_create(request):
                     'form': form,
                     'error_message': "你已经创建了相同的专辑"
                 }
-                return render(request, 'music/album_form.html', context)
+                return render(request, 'music/album_form_add.html', context)
 
             if 'album_logo' in request.FILES.keys():  # 上传了logo文件
-                album.album_logo = request.FILES['album_logo']
-                file_type = album.album_logo.url.split('.')[-1]
-                if file_type is not None and file_type not in IMAGE_FILE_TYPES:
+                file = request.FILES['album_logo']
+                file_path = deal_file(file, 'pic', request.user.id)
+                if file_path == "fail":
                     context = {
                         'form': form,
                         'error_message': "文件格式应为png, jpg, jpeg"
                     }
-                    return render(request, 'music/album_form.html', context)
+                    return render(request, 'music/album_form_add.html', context)
+                else:
+                    album.album_logo = file_path
             else:  # 没上传logo，则字段置空
                 album.album_logo = ''
-            if request.POST['intelligent'] == 'Y':  # 智能创建 l
+            if request.POST.get('intelligent') == 'Y':  # 智能创建
                 pass
             album.save()
             return render(request, 'music/detail.html', {'album': album})
         else:
-            return render(request, 'music/album_form.html', {'form': form})
+            return render(request, 'music/album_form_add.html', {'form': form})
 
 
 class AlbumUpdate(UpdateView):
     model = Album
-    fields = ['artist', 'album_title', 'genre', 'album_logo']
+    form_class = AlbumForm
+    template_name_suffix = '_update_form'
+    permission_required = ''
+    permission_fail_message = ('无权进行此操作')
+
+    def get_form_kwargs(self):  # override parent method
+        kwargs = super(AlbumUpdate, self).get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user
+        })
+        return kwargs
 
 
 class AlbumDelete(DeleteView):
     model = Album
     success_url = reverse_lazy('music:index')
+    permission_required = ''
+    permission_fail_message = ('无权进行此操作')
 
 
 def song_create(request, pk):
@@ -157,6 +183,8 @@ def album_favorite(request, pk):  # TODO 后续若要增加创建喜爱列表的
         if len(favorite_list) == 0:
             favorite_list = FavoriteList(name=init_list_name, user=request.user)
             favorite_list.save()
+            favorite_list = request.user.favorite.filter(name=init_list_name)
+        favorite_list = favorite_list.get()
         find = favorite_list.albums_favorite.filter(pk=album.id).count()
         if find == 1:
             favorite_list.albums_favorite.remove(album)
@@ -176,6 +204,8 @@ def song_favorite(request, song_id):
         if len(favorite_list) == 0:
             favorite_list = FavoriteList(name=init_list_name, user=request.user)
             favorite_list.save()
+            favorite_list = request.user.favorite.filter(name=init_list_name)
+        favorite_list = favorite_list.get()
         find = favorite_list.songs_favorite.filter(pk=song.id).count()
         if find == 1:
             favorite_list.songs_favorite.remove(song)
@@ -201,6 +231,8 @@ def songs(request, filter_by):  # TODO 修改修改
             if len(favorite_list) == 0:
                 favorite_list = FavoriteList(name=init_list_name, user=request.user)
                 favorite_list.save()
+                favorite_list = request.user.favorite.filter(name=init_list_name)
+            favorite_list = favorite_list.get()
             id_songs_favorite = [song.id for song in favorite_list.songs_favorite.all()]
             user_song_list = []
             query = request.GET.get('q')
@@ -259,6 +291,8 @@ def albums(request, filter_by):
             if len(favorite_list) == 0:
                 favorite_list = FavoriteList(name=init_list_name, user=request.user)
                 favorite_list.save()
+                favorite_list = request.user.favorite.filter(name=init_list_name)
+            favorite_list = favorite_list.get()
             id_albums_favorite = [album.id for album in favorite_list.albums_favorite.all()]
             user_album_list = []
             query = request.GET.get('q')
@@ -351,4 +385,35 @@ def login_user(request):
             return render(request, 'music/index.html', {'error_message': '无效登录'})
     return render(request, 'music/login.html')
 
-    # TODO 做一个类似于虾米音乐的网页播放器
+
+# TODO 做一个类似于虾米音乐的网页播放器
+
+
+def deal_file(myfile, own_dir, uid):
+    # 随机生成新的文件名，自定义路径。
+    myext = myfile.name.split('.')[-1]
+    file_name = '{0}.{1}'.format(uuid.uuid4().hex[:10], myext)
+    uid = str(uid)
+    cropped_avatar = os.path.join(uid, own_dir, file_name)
+    # 相对根目录路径
+    file_path = os.path.join(BASE_DIR, "media", uid, own_dir, file_name)
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
+    if own_dir == 'pic':
+        if myext is None or myext not in IMAGE_FILE_TYPES:
+            return "fail"
+        # 压缩尺寸为W*H 280*300。
+        img = Image.open(myfile)
+        crop_im = img.resize((280, 300), Image.ANTIALIAS)
+        crop_im.save(file_path)
+    elif own_dir == 'music_file':
+        with open(file_path, 'w+b') as f:
+            f.write(myfile.file.getvalue())
+        f.close()
+    return cropped_avatar
+
+
+# temp_API
+# distribute this guy. if views need ATOMIC_REQUESTS=TRUE,use the hook(transaction.on_commite)
+def album_create_intel(request):
+    r = img2text_ocr.delay()

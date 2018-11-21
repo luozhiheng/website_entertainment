@@ -1,0 +1,137 @@
+{% extends 'music/base.html' %}
+{% block title %}音乐{% endblock %}
+{% block index_active %}active{% endblock %}
+{% block body %}
+{% load el_pagination_tags %}
+    <div class="albums-container container-fluid">
+
+    {% if not search %}
+        <h2><strong>我的专辑</strong></h2>
+
+        <!--Albums-->
+        <div class="row">
+            {% if error_message %}<h4 class="text-danger"><strong>{{ error_message }}</strong></h4>
+            {% endif %}
+            {% paginate albums %}
+            {% for album in albums %}
+                <div class="col-xm-6 col-md-3">
+                    <div class="thumbnail" style="padding: 5px">
+
+                        <!--img--><a href="{% url "music:detail" album.id %}">
+                        <img class="img-responsive img-thumbnail" style="height: 300px;width: 280px;"  src="{% if album.album_logo %}{{ album.album_logo.url }}{% endif %}"></a>
+
+                        <!--caption-->
+                        <div class="caption">
+                            <h2  style="overflow: hidden;text-overflow: ellipsis" title="{{ album.album_title }}"><nobr>{{ album.album_title }}</nobr></h2>
+                            <h4>{{ album.artist }}</h4>
+
+                            <!--view detail-->
+                            <a class="btn btn-default btn-sm btn-primary"
+                               href="{% url "music:detail" album.id %}">专辑信息</a>
+
+                            <!--delete album-->
+                            <form action="{% url 'music:album-delete' album.id %}" style="display: inline" method="get">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-default btn-sm"><span
+                                        class="glyphicon glyphicon-trash"></span></button>
+                            </form>
+
+                            <!--favorate album-->
+                            <a  href="{% url 'music:album-favorite' album.id %}" role="button" class="btn btn-sm btn-default btn-favorite" >
+                                <span class="glyphicon glyphicon-star
+                                {% for id_album_favorite in id_albums_favorite %}
+                                    {% if id_album_favorite == album.id %}
+                                        active
+                                    {% endif %}
+                                {% endfor %}">
+                                </span>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+                {% cycle ''  '' '' '<div class="clearfix visible-lg"></div>' %}
+            {% endfor %}
+        </div>
+
+
+        <!--show pages when large  EL_PAGINATION_PER_PAGE-->
+        <div class="row panel panel-footer">
+                <h4>{% show_pages %}</h4>
+            </div>
+    {% endif %}
+
+    <!-- If user searches and there are songs -->
+    {% if search %}
+        <h2><strong>搜索结果</strong></h2>
+        {% if songs %}
+            <div class="row songs-container">
+                <div class="col-sm-12">
+                    <h3>Songs</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>标题</td>
+                                        <td>艺人</td>
+                                        <td>文件</td>
+                                        <td>专辑</td>
+                                        <td>喜爱</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% paginate songs %}
+                                    {% for song in songs %}
+                                        <tr>
+                                            <td>{{ song.song_title }}</td>
+                                            <td>{{ song.album.artist }}</td>
+                                            <td>
+                                                <a target="_blank" href="{{ song.audio_file.url }}">
+                                                    <button type="button" class="btn btn-success btn-xs">
+                                                        <span class="glyphicon glyphicon-play"></span>&nbsp; 播放
+                                                    </button>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'music:detail' song.album.id %}">
+                                                    <img src="{{ song.album.album_logo.url }}" class="img-responsive" style="width: 20px; float: left; margin-right: 10px;" />
+                                                </a>
+                                                <a href="{% url 'music:detail' song.album.id %}">{{ song.album.album_title }}</a>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'music:favorite' song.id %}" class="btn btn-sm btn-favorite">
+                                                    <span class="glyphicon glyphicon-star
+                                                    {% for id_song_favorite in id_songs_favorite %}
+                                                        {% if id_song_favorite == song.id %}
+                                                            active
+                                                        {% endif %}
+                                                    {% endfor %}">
+                                                    </span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <div class="row panel panel-footer">
+                                        <h4>{% show_pages %}</h4>
+                                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    </div>
+{% endblock %}
+
+
+
+
+
+
+

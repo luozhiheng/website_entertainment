@@ -1,0 +1,46 @@
+{% extends 'music/base.html' %}
+{% block title %}新增专辑{% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-sm-12 col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>添加专辑</h3>
+                        {% if error_message %}<strong class="text-danger">{{ error_message }}</strong>{% endif %}
+                        <form action="" class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% include 'music/form-template.html' %}
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-9">
+                                    <label title="根据所拍封面自动生成专辑内的歌曲" style="margin-right: 10px">智能创建&nbsp;<input
+                                            type="checkbox" name="intelligent" value="Y" style="vertical-align: top;"/></label>
+                                    <button type="submit" class="btn btn-success">创建</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>添加音乐</h3>
+                        <p>通过此网页你可以上传你的音乐文件</p>
+                        <h3>如何上传?</h3>
+                        <p>首先你要创建一个新的专辑，然后就可以添加歌曲了</p>
+                        <h3>上传专辑的图片注意事项</h3>
+                        <ul>
+                            <li>分辨率为 512x512</li>
+                            <li>文件格式为 .JPG, .GIF, or .PNG</li>
+                            <li>文件大小为 2MB 以下</li>
+                            <li>正方形的图片最为美观</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

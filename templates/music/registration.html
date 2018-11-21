@@ -1,0 +1,27 @@
+{% extends 'music/base_visitor.html' %}
+{% block title %}新增用户{% endblock %}
+{% block register_active %}active{% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-sm-12 col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>创建账户</h3>
+                        {% if error_message %}{{ error_message }}{% endif %}
+                        <form action="" class="form-horizontal" role="form" method="post">
+                            {% csrf_token %}
+                            {% include 'music/form-template.html' %}
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-9">
+                                    <button type="submit" class="btn btn-success">创建</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

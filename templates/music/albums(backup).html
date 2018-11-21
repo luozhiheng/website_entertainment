@@ -1,0 +1,93 @@
+{% extends 'music/base.html' %}
+{% block title %}专辑{% endblock %}
+{% block albums_active %}active{% endblock %}
+{% block search_palce_holder %}搜索专辑{% endblock %}
+{% block body %}
+
+
+    <div class="albums-container container-fluid">
+
+
+        <div class="row">
+            {% if error_message %}<h4 class="text-danger"><strong>{{ error_message }}</strong></h4>
+            {% endif %}
+
+            <!-- pill nav-->
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="nav nav-pills" style="margin-bottom: 10px">
+                        <li role="presentation" class={% if filter_by == 'all' %}active{% endif %}><a
+                                href="{% url 'music:albums' filter_by='all' %}">查看全部</a></li>
+                        <li role="presentation" class={% if filter_by == 'favorite' %}active{% endif %}><a
+                                href="{% url 'music:albums' filter_by='favorite' %}">查看喜爱的</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            {% for key,albums in user_album_dict.items %}
+                <!--if 判断用户是否有专辑-->
+                {% if albums %}
+
+                    <!--header-->
+                    <div class=" btn col-sm-12" style="background-color: lightgray;display: block">
+                        <h4><strong>{{ key }}的专辑</strong></h4>
+                    </div>
+
+                    <!--Albums-->
+                    <div class="row">
+                        {% for album in albums %}
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="thumbnail" style="padding: 5px">
+
+                                    <!--album img--><a href="{% url "music:detail" album.id %}">
+                                    <img class="img-responsive" style="width: 250px;height: 260px;" src="{% if album.album_logo %}{{ album.album_logo.url }}{% endif %}"></a>
+
+                                    <!--caption-->
+                                    <div class="caption">
+                                        <h2>{{ album.album_title }}</h2>
+                                        <h4>{{ album.artist }}</h4>
+
+                                        <!--view detail-->
+                                        <a class="btn btn-default btn-sm btn-primary"
+                                           href="{% url "music:detail" album.id %}">专辑信息</a>
+
+                                        <!--delete album-->
+                                        {% if album.user.username == user.username %}
+                                        <form action="{% url 'music:album-delete' album.id %}" style="display: inline" method="get">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-default btn-sm"><span
+                                                    class="glyphicon glyphicon-trash"></span></button>
+                                        </form>
+                                        {% endif %}
+
+                                        <!--favorate album-->
+                                        <a  href="{% url 'music:album-favorite' album.id %}" role="button" class="btn btn-sm btn-default btn-favorite" >
+                                            <span class="glyphicon glyphicon-star
+                                            {% for id_album_favorite in id_albums_favorite %}
+                                                {% if id_album_favorite == album.id %}
+                                                    active
+                                                {% endif %}
+                                            {% endfor %}">
+                                            </span>
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                            {% cycle ''  '' '' '<div class="clearfix visible-lg"></div>' %}
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
